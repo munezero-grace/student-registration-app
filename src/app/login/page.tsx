@@ -9,11 +9,11 @@ export default function LoginPage() {
     password: ''
   });
 
-  const handleChange = e => {
+  const handleChange = (e: { target: { name: any; value: any; }; }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:5000/api/login', form);

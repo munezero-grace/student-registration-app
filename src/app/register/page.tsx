@@ -12,11 +12,11 @@ export default function RegisterPage() {
     dateOfBirth: ''
   });
 
-  const handleChange = e => {
+  const handleChange = (e: { target: { name: any; value: any; }; }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     const age = calculateAge(new Date(form.dateOfBirth));
     if (age < 10 || age > 20) {
@@ -32,7 +32,7 @@ export default function RegisterPage() {
     }
   };
 
-  const calculateAge = (dob) => {
+  const calculateAge = (dob: Date) => {
     const diff = Date.now() - dob.getTime();
     const ageDate = new Date(diff);
     return Math.abs(ageDate.getUTCFullYear() - 1970);
