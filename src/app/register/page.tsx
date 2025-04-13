@@ -1,7 +1,7 @@
 "use client";
 import { useState } from 'react';
 import Navbar from '../_components/Navbar';
-import axios from 'axios';
+// import axios from 'axios';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -24,8 +24,8 @@ export default function RegisterPage() {
       return;
     }
     try {
-      const res = await axios.post('http://localhost:5000/api/register', form);
-      alert('Registered successfully!');
+      // const res = await axios.post('http://localhost:5000/api/register', form);
+      // alert('Registered successfully!', res ? res.data : '');
     } catch (err) {
       console.error(err);
       alert('Registration failed!');
