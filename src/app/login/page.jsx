@@ -1,6 +1,6 @@
 "use client";
 import { useState } from 'react';
-import Navbar from '../../components/Navbar';
+import Navbar from '../_components/Navbar';
 import axios from 'axios';
 
 export default function LoginPage() {
@@ -30,7 +30,7 @@ export default function LoginPage() {
   return (
     <>
       <Navbar />
-      <div className="max-w-md mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
+      <div className="max-w-md mx-auto mt-10 bg-white shadow-md rounded-lg p-6 text-gray-800">
         <h2 className="text-2xl font-bold mb-4 text-center">Login to your account</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
