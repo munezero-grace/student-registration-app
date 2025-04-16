@@ -32,9 +32,11 @@ cd student-registration-app
 
 
 
-2. Install Dependencies
-Frontend (Next.js)
-Navigate to the frontend directory and install the required dependencies:
+### 2. Install Dependencies
+
+#### Frontend (Next.js)
+Navigate to the `frontend` directory and install the required dependencies:
+
 
 ```bash
 cd frontend
@@ -42,8 +44,9 @@ npm install
 ```
 
 
-Backend (Node.js/Express)
-Navigate to the backend directory and install the required dependencies:
+#### Backend (Node.js/Express)
+Navigate to the `backend` directory and install the required dependencies:
+
 
 ```bash
 cd ../backend
@@ -52,16 +55,19 @@ npm install
 
 
 
-3. Set Up Environment Variables
+### 3. Set Up Environment Variables
+
 Create a .env file in both the frontend and backend directories and add the necessary environment variables:
 
-Frontend (frontend/.env):
+**Frontend (.env file in the frontend directory):**
+
 ```env
 NEXT_PUBLIC_API_URL=<Your Backend API URL>
 ```
 
 
-Backend (backend/.env):
+
+**Backend (.env file in the backend directory):**
 ```env
 PORT=5000
 DATABASE_URL=<Your PostgreSQL database URL> 
@@ -70,8 +76,9 @@ JWT_SECRET=<Your JWT secret key>
 
 
 
-4. Running the Application
-Frontend
+### 4. Running the Application
+
+#### Frontend:
 Start the frontend development server:
 
 ```bash
@@ -79,7 +86,8 @@ cd frontend
 npm run dev
 ```
 
-Backend
+
+#### Backend:
 Start the backend server (you can use npm start or nodemon):
 
 ```bash
@@ -87,66 +95,79 @@ cd backend
 npm start
 ```
 
-
 Once both servers are running:
 
 Frontend: http://localhost:3000
 
 Backend: http://localhost:5000 
 
-📝 API Documentation
+
+
+
+### 5.📝 API Documentation
 
 The following endpoints are available:
 
-POST /api/register: Register a new student (email, password, firstName, lastName, dateOfBirth).
-
-POST /api/login: Login a user (email and password).
-
-GET /api/profile: Fetch the logged-in student's profile (JWT protected).
-
-GET /api/admin/users: List all users (admin access only).
-
-PUT /api/admin/users/:id: Update a registered user (admin access only).
-
-DELETE /api/admin/users/:id: Delete a registered user (admin access only).
+- **POST /api/register**: Register a new student (email, password, firstName, lastName, dateOfBirth).
+- **POST /api/login**: Login a user (email and password).
+- **GET /api/profile**: Fetch the logged-in student's profile (JWT protected).
+- **GET /api/admin/users**: List all users (admin access only).
+- **PUT /api/admin/users/:id**: Update a registered user (admin access only).
+- **DELETE /api/admin/users/:id**: Delete a registered user (admin access only).
 
 
-📋 Project Structure
+
+
+
+
+### 6.📋 Project Structure
+
 The project is organized into two main directories:
 
-frontend/ - Contains the Next.js application (client-side).
+- **frontend/**: Contains the Next.js application (client-side).
+- **backend/**: Contains the Node.js/Express API (server-side).
 
-backend/ - Contains the Node.js/Express API (server-side).
 
-🎯 Features
-JWT Authentication with Google and GitHub OAuth
 
-Admin Dashboard for managing users
 
-Unique Registration Numbers (e.g., REG-xxxx-2025)
 
-Responsive UI built with Tailwind CSS
+### 7.🎯 Features
 
-✅ Testing
-Test API endpoints with tools like Postman or Insomnia:
+- JWT Authentication with Google and GitHub OAuth
+- Admin Dashboard for managing users
+- Unique Registration Numbers (e.g., REG-xxxx-2025)
+- Responsive UI built with Tailwind CSS
 
-Registration: POST /api/register
 
-Login: POST /api/login
 
-Profile Access: GET /api/profile (JWT token required)
 
-Admin User Management: GET /api/admin/users, PUT /api/admin/users/:id, DELETE /api/admin/users/:id
+### 8.✅ Testing
 
-🚧 Contributions
+- Test API endpoints with tools like Postman or Insomnia:
+  - Registration: POST /api/register
+  - Login: POST /api/login
+  - Profile Access: GET /api/profile (JWT token required)
+  - Admin User Management: 
+    - GET /api/admin/users  
+    - PUT /api/admin/users/:id  
+    - DELETE /api/admin/users/:id
+
+
+
+
+### 9.🚧 Contributions
+
 Feel free to fork the repository, create a new branch, and submit a pull request for any improvements or fixes. Contributions are welcome!
 
-💡 Bonus Features
-Environment variable usage for sensitive data.
 
-Swagger API documentation integration (swagger-jsdoc or swagger-ui-express).
 
-Unit testing (Jest) for backend and frontend.
+### 10.💡 Bonus Features
 
-Paginated user display for the admin dashboard.
+- Environment variable usage for sensitive data
+- Swagger API documentation integration (swagger-jsdoc or swagger-ui-express)
+- Unit testing (Jest) for backend and frontend
+- Paginated user display for the admin dashboard
 
+### 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
