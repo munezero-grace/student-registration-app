@@ -118,7 +118,7 @@ export default function RegisterPage() {
     try {
       setLoading(true);
       
-      // Call the register function from auth service
+      // Prepare registration data
       const registrationData: RegistrationData = {
         firstName: form.firstName,
         lastName: form.lastName,
@@ -127,13 +127,20 @@ export default function RegisterPage() {
         dateOfBirth: form.dateOfBirth,
       };
       
+      // Call the API through our service
       const result = await registerUser(registrationData);
       
       if (result.success) {
-        toast.success('Registration successful! Please log in.');
-        router.push('/login');
+        // Show success message
+        toast.success(result.message || 'Registration successful! Please log in.');
+        
+        // Redirect to login page
+        setTimeout(() => {
+          router.push('/login');
+        }, 1500);
       } else {
-        toast.error(result.message || 'Registration failed');
+        // Show error message from API or service
+        toast.error(result.message || 'Registration failed. Please try again.');
       }
     } catch (err: any) {
       console.error('Registration error:', err);
@@ -172,7 +179,7 @@ export default function RegisterPage() {
                 {/* First Name Field */}
                 <div>
                   <label htmlFor="firstName" className="block text-sm font-medium text-black">
-                    First Name
+                    First Namexcvxvx
                   </label>
                   <div className="mt-1">
                     <input
@@ -321,7 +328,15 @@ export default function RegisterPage() {
                       : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                   }`}
                 >
-                  {loading ? 'Creating account...' : 'Register'}
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating account...
+                    </>
+                  ) : 'Register'}
                 </button>
               </div>
             </form>
