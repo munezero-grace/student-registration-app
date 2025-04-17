@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../_components/Navbar';
-import { registerUser } from '@/lib/services/authService';
+import { registerUser, RegistrationData } from '@/lib/services/authService';
 import toast from 'react-hot-toast';
 
 interface FormErrors {
@@ -119,13 +119,15 @@ export default function RegisterPage() {
       setLoading(true);
       
       // Call the register function from auth service
-      const result = await registerUser({
+      const registrationData: RegistrationData = {
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
         password: form.password,
         dateOfBirth: form.dateOfBirth,
-      });
+      };
+      
+      const result = await registerUser(registrationData);
       
       if (result.success) {
         toast.success('Registration successful! Please log in.');

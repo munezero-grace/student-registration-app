@@ -13,13 +13,27 @@ export interface UserProfile {
   updatedAt: string;
 }
 
-// Mock database for users (this would be replaced by actual API calls)
-let mockUsers: UserProfile[] = [
+// Interface for registration that includes password
+export interface RegistrationData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  dateOfBirth: string;
+}
+
+// Mock database with passwords (in a real app, passwords would be hashed)
+interface UserWithPassword extends UserProfile {
+  password: string;
+}
+
+let mockUsersWithPasswords: UserWithPassword[] = [
   {
     id: "550e8400-e29b-41d4-a716-446655440000",
     firstName: "Jane",
     lastName: "Smith",
     email: "jane.smith@university.edu",
+    password: "password123", // In a real app, this would be hashed
     registrationNumber: "REG-78945612-2025",
     dateOfBirth: "2005-09-15",
     role: "student",
@@ -31,6 +45,7 @@ let mockUsers: UserProfile[] = [
     firstName: "Admin",
     lastName: "User",
     email: "admin@university.edu",
+    password: "admin123", // In a real app, this would be hashed
     registrationNumber: "ADM-12345678-2025",
     dateOfBirth: "1990-01-01",
     role: "admin",
@@ -38,6 +53,9 @@ let mockUsers: UserProfile[] = [
     updatedAt: "2024-01-01T09:00:00Z"
   }
 ];
+
+// Keep a separate mockUsers array without passwords for other functions
+let mockUsers: UserProfile[] = mockUsersWithPasswords.map(({...user}) => user);
 
 // Helper function to generate a random registration number
 const generateRegistrationNumber = (): string => {
@@ -60,14 +78,11 @@ export const login = async (email: string, password: string): Promise<{ token: s
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       // Find user by email
-      const user = mockUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+      const user = mockUsersWithPasswords.find(u => u.email.toLowerCase() === email.toLowerCase());
       
       // In a real application, you would hash and compare passwords
-      // For simplicity in this mock service, we're using plain text comparison
       if (user) {
-        if ((user.email === "jane.smith@university.edu" && password === "password123") || 
-            (user.email === "admin@university.edu" && password === "admin123")) {
-          
+        if (user.password === password) {
           // Return a mock JWT token along with user role
           localStorage.setItem("userRole", user.role);
           resolve({ token: `mock-${user.role}-jwt-token`, role: user.role });
@@ -120,11 +135,11 @@ export const fetchUserProfile = async (): Promise<UserProfile> => {
 };
 
 // Simulated registration function
-export const registerUser = async (userData: Omit<UserProfile, 'id' | 'registrationNumber' | 'role' | 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; message: string }> => {
+export const registerUser = async (userData: RegistrationData): Promise<{ success: boolean; message: string }> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       // Check if email already exists
-      const existingUser = mockUsers.find(u => u.email.toLowerCase() === userData.email.toLowerCase());
+      const existingUser = mockUsersWithPasswords.find(u => u.email.toLowerCase() === userData.email.toLowerCase());
       
       if (existingUser) {
         reject(new Error("Email already registered"));
@@ -133,8 +148,12 @@ export const registerUser = async (userData: Omit<UserProfile, 'id' | 'registrat
       
       // Create new user with generated id and registration number
       const now = new Date().toISOString();
-      const newUser: UserProfile = {
-        ...userData,
+      const newUser: UserWithPassword = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        password: userData.password,
+        dateOfBirth: userData.dateOfBirth,
         id: generateUUID(),
         registrationNumber: generateRegistrationNumber(),
         role: 'student', // Default role is student
@@ -142,8 +161,9 @@ export const registerUser = async (userData: Omit<UserProfile, 'id' | 'registrat
         updatedAt: now
       };
       
-      // Add to mock database
-      mockUsers.push(newUser);
+      // Add to mock databases
+      mockUsersWithPasswords.push(newUser);
+      mockUsers = mockUsersWithPasswords.map(({...user}) => user);
       
       // In a real app, this would persist to a database
       resolve({ success: true, message: "Registration successful" });
@@ -205,10 +225,11 @@ export const deleteUser = async (userId: string): Promise<{ success: boolean; me
         return;
       }
       
-      const initialLength = mockUsers.length;
-      mockUsers = mockUsers.filter(user => user.id !== userId);
+      const initialLength = mockUsersWithPasswords.length;
+      mockUsersWithPasswords = mockUsersWithPasswords.filter(user => user.id !== userId);
+      mockUsers = mockUsersWithPasswords.map(({...user}) => user);
       
-      if (mockUsers.length === initialLength) {
+      if (mockUsersWithPasswords.length === initialLength) {
         reject(new Error("User not found"));
       } else {
         resolve({ success: true, message: "User deleted successfully" });
@@ -234,7 +255,7 @@ export const updateUser = async (userId: string, userData: Partial<Omit<UserProf
         return;
       }
       
-      const userIndex = mockUsers.findIndex(user => user.id === userId);
+      const userIndex = mockUsersWithPasswords.findIndex(user => user.id === userId);
       
       if (userIndex === -1) {
         reject(new Error("User not found"));
@@ -242,11 +263,14 @@ export const updateUser = async (userId: string, userData: Partial<Omit<UserProf
       }
       
       // Update the user data
-      mockUsers[userIndex] = {
-        ...mockUsers[userIndex],
+      mockUsersWithPasswords[userIndex] = {
+        ...mockUsersWithPasswords[userIndex],
         ...userData,
         updatedAt: new Date().toISOString()
       };
+      
+      // Update the non-password version too
+      mockUsers = mockUsersWithPasswords.map(({...user}) => user);
       
       resolve({ success: true, message: "User updated successfully" });
     }, 500);
