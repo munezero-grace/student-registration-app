@@ -1,0 +1,225 @@
+"use client";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Navbar from '../_components/Navbar';
+import { UserProfile, fetchUserProfile, isAuthenticated } from '@/lib/services/authService';
+import toast from 'react-hot-toast';
+
+export default function ProfilePage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is logged in
+    if (!isAuthenticated()) {
+      toast.error("Please login to view your profile");
+      router.push('/login');
+      return;
+    }
+
+    const getProfileData = async () => {
+      try {
+        setLoading(true);
+        const userData = await fetchUserProfile();
+        setProfile(userData);
+        setLoading(false);
+      } catch (err: any) {
+        console.error('Error fetching profile:', err);
+        setError(err.message || 'Failed to fetch profile data.');
+        setLoading(false);
+      }
+    };
+
+    getProfileData();
+  }, [router]);
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-50 py-8">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <div className="animate-pulse flex flex-col items-center p-8">
+                <div className="rounded-full bg-gray-300 h-32 w-32 mb-4"></div>
+                <div className="h-8 bg-gray-300 rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-gray-300 rounded w-1/4 mb-8"></div>
+                <div className="space-y-3 w-full max-w-md">
+                  <div className="h-4 bg-gray-300 rounded w-full"></div>
+                  <div className="h-4 bg-gray-300 rounded w-full"></div>
+                  <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-50 py-8">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg shadow p-8 text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
+                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Profile</h2>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  if (profile) {
+    // Format dates for display
+    const formattedDOB = new Date(profile.dateOfBirth).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    
+    const formattedJoinDate = new Date(profile.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    // Calculate age
+    const birthDate = new Date(profile.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-50 py-8">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              {/* Profile Header */}
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-5 sm:px-6 text-white">
+                <div className="flex flex-col md:flex-row items-center justify-between">
+                  <div className="flex flex-col md:flex-row items-center">
+                    <div className="relative h-24 w-24 md:mr-6 mb-4 md:mb-0">
+                      <div className="h-24 w-24 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-3xl font-bold text-white">
+                        {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
+                      </div>
+                    </div>
+                    <div className="text-center md:text-left">
+                      <h1 className="text-2xl font-bold">{profile.firstName} {profile.lastName}</h1>
+                      <p className="mt-1 max-w-2xl text-sm text-blue-100">
+                        {profile.registrationNumber}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 md:mt-0">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-200 text-blue-800">
+                      {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Profile Content */}
+              <div className="border-t border-gray-200 px-4 py-6 sm:p-6">
+                <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Personal Information</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-gray-500 mb-1">Full Name</div>
+                    <div className="mt-1 text-sm text-gray-900">{profile.firstName} {profile.lastName}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-gray-500 mb-1">Email Address</div>
+                    <div className="mt-1 text-sm text-gray-900">{profile.email}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-gray-500 mb-1">Registration Number</div>
+                    <div className="mt-1 text-sm text-gray-900">{profile.registrationNumber}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-gray-500 mb-1">User Role</div>
+                    <div className="mt-1 text-sm text-gray-900 capitalize">{profile.role}</div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-gray-500 mb-1">Date of Birth</div>
+                    <div className="mt-1 text-sm text-gray-900">{formattedDOB} <span className="text-gray-500">({age} years old)</span></div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="text-sm font-medium text-gray-500 mb-1">Joined On</div>
+                    <div className="mt-1 text-sm text-gray-900">{formattedJoinDate}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons Section */}
+              <div className="px-4 py-4 sm:px-6 bg-gray-50 border-t border-gray-200">
+                <div className="flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Edit Profile
+                  </button>
+                  {profile.role === 'admin' && (
+                    <button
+                      onClick={() => router.push('/admin')}
+                      className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Admin Dashboard
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Fallback in case profile is still null after loading (shouldn't happen ideally)
+  return (
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No Profile Found</h2>
+            <p className="text-gray-600 mb-4">Unable to load profile information.</p>
+            <button 
+              onClick={() => router.push('/login')} 
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Back to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
