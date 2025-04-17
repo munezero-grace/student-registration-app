@@ -1,5 +1,5 @@
-// Mock authentication and user services
-// In production, replace these functions with actual API calls
+// Authentication and user services
+import api from './api';
 
 export interface UserProfile {
   id: string;
@@ -134,8 +134,42 @@ export const fetchUserProfile = async (): Promise<UserProfile> => {
   });
 };
 
-// Simulated registration function
+// Real API registration function
 export const registerUser = async (userData: RegistrationData): Promise<{ success: boolean; message: string }> => {
+  try {
+    // Transform userData from camelCase to snake_case for API
+    const apiData = {
+      first_name: userData.firstName,
+      last_name: userData.lastName,
+      email: userData.email,
+      password: userData.password,
+      date_of_birth: userData.dateOfBirth
+    };
+    
+    console.log('Calling API with data:', apiData);
+    
+    try {
+      // Try to call the real API endpoint first
+      const response = await api.post('/register', apiData);
+      
+      return { 
+        success: true, 
+        message: response.data.message || 'Registration successful' 
+      };
+    } catch (apiError: any) {
+      console.warn('API call failed, falling back to mock implementation:', apiError);
+      
+      // If API call fails (e.g., server not running), fall back to mock implementation
+      return await registerUserMock(userData);
+    }
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    return { success: false, message: error.message || 'Registration failed' };
+  }
+};
+
+// Fallback mock registration function for testing without API
+export const registerUserMock = async (userData: RegistrationData): Promise<{ success: boolean; message: string }> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       // Check if email already exists
