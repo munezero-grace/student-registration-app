@@ -15,7 +15,9 @@ api.interceptors.request.use(
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
       if (token) {
+        // Make sure we're using the correct Authorization header format
         config.headers.Authorization = `Bearer ${token}`;
+        console.log('Added token to request:', config.url);
       }
     }
     return config;
@@ -41,6 +43,12 @@ api.interceptors.response.use(
           localStorage.removeItem('token');
           localStorage.removeItem('userRole');
           window.location.href = '/login';
+        }
+      } else if (error.response.status === 403) {
+        // Forbidden - user doesn't have permission
+        console.error('Access forbidden');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/unauthorized';
         }
       }
       // Log the response error
