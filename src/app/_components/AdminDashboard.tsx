@@ -7,7 +7,6 @@ import {
   ChevronUp,
   ChevronDown,
   Plus,
-  User as UserIcon,
   Calendar,
   Mail,
   Hash,
@@ -203,10 +202,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       }
 
       // Normal property sorting
-      if (a[sortConfig.key as keyof User] < b[sortConfig.key as keyof User]) {
+      if ((a[sortConfig.key as keyof User] ?? '') < (b[sortConfig.key as keyof User] ?? '')) {
         return sortConfig.direction === "ascending" ? -1 : 1;
       }
-      if (a[sortConfig.key as keyof User] > b[sortConfig.key as keyof User]) {
+      if ((a[sortConfig.key as keyof User] ?? '') > (b[sortConfig.key as keyof User] ?? '')) {
         return sortConfig.direction === "ascending" ? 1 : -1;
       }
       return 0;
