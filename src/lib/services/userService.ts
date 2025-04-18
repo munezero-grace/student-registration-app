@@ -59,7 +59,7 @@ const clearCache = (keyPattern?: string): void => {
 };
 
 // Type definitions for user data
-interface User {
+export interface User {
   id: string;
   firstName: string;
   lastName: string;
@@ -70,7 +70,7 @@ interface User {
   createdAt: string;
 }
 
-interface PaginationParams {
+export interface PaginationParams {
   page?: number;
   limit?: number;
   search?: string;
@@ -79,7 +79,7 @@ interface PaginationParams {
   sortOrder?: 'asc' | 'desc';
 }
 
-interface UpdateUserData {
+export interface UpdateUserData {
   firstName?: string;
   lastName?: string;
   email?: string;
