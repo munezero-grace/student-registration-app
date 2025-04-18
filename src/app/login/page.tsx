@@ -64,9 +64,18 @@ export default function LoginPage() {
       
       // Call the login function from authService
       const { token, role } = await login(form.email, form.password);
+      console.log('Login successful, received token:', token ? 'Token exists' : 'No token received');
+      console.log('User role:', role);
       
       // Store the JWT token
-      localStorage.setItem('token', token);
+      if (token) {
+        localStorage.setItem('token', token);
+        console.log('Token stored in localStorage');
+      } else {
+        console.error('No token received from login API');
+        toast.error('Authentication error: No token received');
+        return;
+      }
       
       // Success message
       toast.success('Login successful!');
@@ -217,15 +226,7 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-        
-        {/* Testing credentials hint */}
-        <div className="mt-8 max-w-md mx-auto rounded-md bg-blue-50 p-4">
-          <h3 className="text-sm font-medium text-black mb-2">Test Credentials</h3>
-          <div className="text-xs text-black space-y-1">
-            <p><strong>Student:</strong> grace_munezero911@gmail.com / test1234</p>
-            <p><strong>Admin:</strong> admin@example.com / admin1234</p>
-          </div>
-        </div>
+    
       </div>
     </>
   );

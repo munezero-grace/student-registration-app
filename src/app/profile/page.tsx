@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '../_components/Navbar';
-import { UserProfile, fetchUserProfile, isAuthenticated } from '@/lib/services/authService';
+import { UserProfile, fetchUserProfile, fetchUserProfileWithToken, isAuthenticated } from '@/lib/services/authService';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
@@ -10,6 +10,41 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  // Function to save the test token to localStorage
+  const saveTestToken = () => {
+    const curlToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVkODVhNTRhLTgwMzctNDBmOS05NDlhLTlmNjJkZmQyZmQ3MCIsImVtYWlsIjoiY2xhdWRpbmVAZ21haWwuY29tIiwicm9sZSI6InN0dWRlbnQiLCJpYXQiOjE3NDQ5NzkzNTMsImV4cCI6MTc0NTA2NTc1M30.HkLsjGv3fNcHOnIfMzZuUjaT3US0E2T-NfPbnUuQuYA";
+    localStorage.setItem('token', curlToken);
+    localStorage.setItem('userRole', 'student');
+    toast.success('Test token saved to localStorage');
+    window.location.reload();
+  };
+  
+  // Function to directly test the API with a specific token
+  const testWithCurlToken = async () => {
+    const curlToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImVkODVhNTRhLTgwMzctNDBmOS05NDlhLTlmNjJkZmQyZmQ3MCIsImVtYWlsIjoiY2xhdWRpbmVAZ21haWwuY29tIiwicm9sZSI6InN0dWRlbnQiLCJpYXQiOjE3NDQ5NzkzNTMsImV4cCI6MTc0NTA2NTc1M30.HkLsjGv3fNcHOnIfMzZuUjaT3US0E2T-NfPbnUuQuYA";
+    
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Testing API with curl token...');
+      
+      // Use our helper function to fetch the profile with the specific token
+      const userData = await fetchUserProfileWithToken(curlToken);
+      
+      console.log('Profile data from test token:', userData);
+      setProfile(userData);
+      setLoading(false);
+      toast.success("Profile loaded with test token");
+      
+    } catch (error: any) {
+      console.error('Direct API test error:', error);
+      setError(`Direct API test failed: ${error.message}`);
+      setLoading(false);
+      toast.error(`Test failed: ${error.message}`);
+    }
+  };
 
   useEffect(() => {
     // Check if user is logged in
@@ -22,13 +57,37 @@ export default function ProfilePage() {
     const getProfileData = async () => {
       try {
         setLoading(true);
+        
+        // Check if token exists
+        const token = localStorage.getItem('token');
+        console.log('Token from localStorage:', token ? 'Token exists' : 'No token');
+        
+        // Fetch user profile
+        console.log('Calling fetchUserProfile()');
         const userData = await fetchUserProfile();
+        console.log('Received profile data:', userData);
+        
+        // Check if we received valid data
+        if (!userData || typeof userData !== 'object') {
+          console.error('Invalid profile data:', userData);
+          throw new Error('Invalid profile data received');
+        }
+        
+        // Validate essential fields
+        if (!userData.firstName || !userData.lastName || !userData.email) {
+          console.warn('Profile data missing essential fields:', userData);
+        }
+        
         setProfile(userData);
         setLoading(false);
+        // On successful profile fetch, show success message
+        toast.success("Profile loaded successfully");
       } catch (err: any) {
         console.error('Error fetching profile:', err);
         setError(err.message || 'Failed to fetch profile data.');
         setLoading(false);
+        // Show error toast
+        toast.error(err.message || 'Failed to fetch profile data.');
       }
     };
 
@@ -50,6 +109,20 @@ export default function ProfilePage() {
                   <div className="h-4 bg-gray-300 rounded w-full"></div>
                   <div className="h-4 bg-gray-300 rounded w-full"></div>
                   <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                </div>
+                <div className="mt-8 flex space-x-4 justify-center">
+                  <button 
+                    onClick={testWithCurlToken} 
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                  >
+                    Test With Sample Token
+                  </button>
+                  <button 
+                    onClick={saveTestToken} 
+                    className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                  >
+                    Save Test Token
+                  </button>
                 </div>
               </div>
             </div>
@@ -73,12 +146,26 @@ export default function ProfilePage() {
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Profile</h2>
               <p className="text-gray-600 mb-4">{error}</p>
-              <button 
-                onClick={() => window.location.reload()} 
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Try Again
-              </button>
+              <div className="flex space-x-4 justify-center">
+                <button 
+                  onClick={() => window.location.reload()} 
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Try Again
+                </button>
+                <button 
+                  onClick={testWithCurlToken} 
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                >
+                  Test With Sample Token
+                </button>
+                <button 
+                  onClick={saveTestToken} 
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  Save Test Token
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -121,19 +208,27 @@ export default function ProfilePage() {
                   <div className="flex flex-col md:flex-row items-center">
                     <div className="relative h-24 w-24 md:mr-6 mb-4 md:mb-0">
                       <div className="h-24 w-24 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-3xl font-bold text-white">
-                        {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
+                        {profile?.firstName && profile?.lastName ? (
+                          <>
+                            {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
+                          </>
+                        ) : (
+                          'U'
+                        )}
                       </div>
                     </div>
                     <div className="text-center md:text-left">
-                      <h1 className="text-2xl font-bold">{profile.firstName} {profile.lastName}</h1>
+                      <h1 className="text-2xl font-bold">
+                        {profile?.firstName || ''} {profile?.lastName || ''}
+                      </h1>
                       <p className="mt-1 max-w-2xl text-sm text-blue-100">
-                        {profile.registrationNumber}
+                        {profile?.registrationNumber || 'No registration number'}
                       </p>
                     </div>
                   </div>
                   <div className="mt-4 md:mt-0">
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-200 text-blue-800">
-                      {profile.role.charAt(0).toUpperCase() + profile.role.slice(1)}
+                      {profile?.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : 'User'}
                     </span>
                   </div>
                 </div>
@@ -146,32 +241,40 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="text-sm font-medium text-gray-500 mb-1">Full Name</div>
-                    <div className="mt-1 text-sm text-gray-900">{profile.firstName} {profile.lastName}</div>
+                    <div className="mt-1 text-sm text-gray-900">{profile?.firstName || 'N/A'} {profile?.lastName || ''}</div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="text-sm font-medium text-gray-500 mb-1">Email Address</div>
-                    <div className="mt-1 text-sm text-gray-900">{profile.email}</div>
+                    <div className="mt-1 text-sm text-gray-900">{profile?.email || 'N/A'}</div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="text-sm font-medium text-gray-500 mb-1">Registration Number</div>
-                    <div className="mt-1 text-sm text-gray-900">{profile.registrationNumber}</div>
+                    <div className="mt-1 text-sm text-gray-900">{profile?.registrationNumber || 'N/A'}</div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="text-sm font-medium text-gray-500 mb-1">User Role</div>
-                    <div className="mt-1 text-sm text-gray-900 capitalize">{profile.role}</div>
+                    <div className="mt-1 text-sm text-gray-900 capitalize">{profile?.role || 'N/A'}</div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="text-sm font-medium text-gray-500 mb-1">Date of Birth</div>
-                    <div className="mt-1 text-sm text-gray-900">{formattedDOB} <span className="text-gray-500">({age} years old)</span></div>
+                    <div className="mt-1 text-sm text-gray-900">
+                      {profile?.dateOfBirth ? (
+                        <>
+                          {formattedDOB} <span className="text-gray-500">({age} years old)</span>
+                        </>
+                      ) : 'N/A'}
+                    </div>
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <div className="text-sm font-medium text-gray-500 mb-1">Joined On</div>
-                    <div className="mt-1 text-sm text-gray-900">{formattedJoinDate}</div>
+                    <div className="mt-1 text-sm text-gray-900">
+                      {profile?.createdAt ? formattedJoinDate : 'N/A'}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -185,7 +288,7 @@ export default function ProfilePage() {
                   >
                     Edit Profile
                   </button>
-                  {profile.role === 'admin' && (
+                  {profile?.role === 'admin' && (
                     <button
                       onClick={() => router.push('/admin')}
                       className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -211,12 +314,26 @@ export default function ProfilePage() {
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">No Profile Found</h2>
             <p className="text-gray-600 mb-4">Unable to load profile information.</p>
-            <button 
-              onClick={() => router.push('/login')} 
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Back to Login
-            </button>
+            <div className="flex space-x-4 justify-center">
+              <button 
+                onClick={() => router.push('/login')} 
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Back to Login
+              </button>
+              <button 
+                onClick={testWithCurlToken} 
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              >
+                Test With Sample Token
+              </button>
+              <button 
+                onClick={saveTestToken} 
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Save Test Token
+              </button>
+            </div>
           </div>
         </div>
       </div>
