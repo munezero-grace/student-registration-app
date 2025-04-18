@@ -27,9 +27,6 @@ export default function AdminPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleAddUser = () => {
-    router.push('/register');
-  };
 
   return (
     <>
@@ -77,7 +74,7 @@ export default function AdminPage() {
 
         {/* Main content */}
         <div className="flex-1">
-          <AdminDashboard onAddUser={handleAddUser} />
+          <AdminDashboard />
         </div>
       </div>
     </>
