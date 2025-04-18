@@ -213,13 +213,17 @@ export const fetchUserProfileWithToken = async (
   try {
     console.log("Fetching profile with specific token...");
 
-    const response = await fetch("http://localhost:4000/api/profile", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/profile`,
+      {
+        //const response = await fetch("http://localhost:4000/api/profile", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
