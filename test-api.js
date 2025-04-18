@@ -1,5 +1,5 @@
 // Simple script to test the backend API connection
-const axios = require("axios");
+import axios from "axios";
 
 // Registration request configuration
 const config = {
