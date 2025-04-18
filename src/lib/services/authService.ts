@@ -73,8 +73,41 @@ const generateUUID = (): string => {
   });
 };
 
-// Simulated login function
+// Real API login function
 export const login = async (email: string, password: string): Promise<{ token: string; role: string }> => {
+  try {
+    // Call the real API endpoint
+    const response = await api.post('/login', { email, password });
+    
+    // Extract token and role from response
+    const { token, role } = response.data;
+    
+    // Store role for later use
+    if (role) {
+      localStorage.setItem("userRole", role);
+    }
+    
+    return { token, role };
+  } catch (error: any) {
+    console.error('Login error:', error);
+    
+    // If the API is unavailable (for development/testing), fall back to mock
+    if (error.request && !error.response) {
+      console.warn('API server might be down, falling back to mock login');
+      return loginMock(email, password);
+    }
+    
+    // Handle specific error messages from the API
+    if (error.response && error.response.data && error.response.data.message) {
+      throw new Error(error.response.data.message);
+    }
+    
+    throw new Error(error.message || 'Login failed');
+  }
+};
+
+// Fallback mock login function for testing without API
+export const loginMock = async (email: string, password: string): Promise<{ token: string; role: string }> => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       // Find user by email
