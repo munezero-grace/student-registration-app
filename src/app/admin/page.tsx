@@ -28,7 +28,7 @@ export default function AdminPage() {
   }, []);
 
   const handleAddUser = () => {
-    router.push('/register');
+    // The AdminDashboard component will now handle this internally
   };
 
   return (

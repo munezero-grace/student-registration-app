@@ -6,17 +6,16 @@ import {
   X,
   ChevronUp,
   ChevronDown,
-  Plus,
+  UserPlus,
 } from "lucide-react";
 import userService, { PaginationParams } from "@/lib/services/userService";
+import { registerUser, RegistrationData } from "@/lib/services/authService";
 import { useToast } from "../contexts/ToastContext";
 import SkeletonLoader from "./SkeletonLoader";
 
-interface AdminDashboardProps {
-  onAddUser?: () => void;
-}
+type AdminDashboardProps = unknown;
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddUser }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = () => {
   const { showSuccess, showError, showInfo } = useToast();
 
   const [users, setUsers] = useState<any[]>([]);
@@ -44,6 +43,22 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddUser }) => {
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [userToDelete, setUserToDelete] = useState<any | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [addFormData, setAddFormData] = useState<{
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    dateOfBirth: string;
+    role: "admin" | "student";
+  }>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    dateOfBirth: "",
+    role: "student",
+  });
   const [editFormData, setEditFormData] = useState<{
     firstName: string;
     lastName: string;
@@ -184,6 +199,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddUser }) => {
     setEditFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAddFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setAddFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleUpdateUser = async () => {
     try {
       showInfo("Updating user information...");
@@ -209,6 +231,53 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddUser }) => {
         showError(`Validation error: ${error.response?.data?.error}`);
       else if (error.request) showError("Network error.");
       else showError("Failed to update user.");
+    }
+  };
+
+  const openAddModal = () => {
+    // Set a default date of birth (about 15 years ago)
+    const defaultDate = new Date();
+    defaultDate.setFullYear(defaultDate.getFullYear() - 15);
+    const defaultDateString = defaultDate.toISOString().split('T')[0];
+    
+    setAddFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "12345678", // Default password
+      dateOfBirth: defaultDateString,
+      role: "student",
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleCreateUser = async () => {
+    try {
+      showInfo("Creating new user...");
+      
+      // Create registration data for the API
+      const registrationData: RegistrationData = {
+        firstName: addFormData.firstName,
+        lastName: addFormData.lastName,
+        email: addFormData.email,
+        password: addFormData.password,
+        dateOfBirth: addFormData.dateOfBirth
+      };
+      
+      // Call the register API
+      const result = await registerUser(registrationData);
+      
+      if (result.success) {
+        setIsAddModalOpen(false);
+        showSuccess(`User ${addFormData.firstName} ${addFormData.lastName} created successfully`);
+        fetchUsers(); // Refresh the user list
+      } else {
+        showError(result.message || "Failed to create user");
+      }
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      const message = error.response?.data?.error || error.message || "Failed to create user";
+      showError(message);
     }
   };
 
@@ -255,10 +324,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddUser }) => {
             Student Registration System
           </h1>
           <button
-            onClick={onAddUser}
+            onClick={openAddModal}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center gap-2"
           >
-            <Plus size={18} /> Add New User
+            <UserPlus size={18} /> Add New User
           </button>
         </div>
         <SkeletonLoader rows={5} />
@@ -290,10 +359,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddUser }) => {
           Student Registration System
         </h1>
         <button
-          onClick={onAddUser}
+          onClick={openAddModal}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium flex items-center gap-2"
         >
-          <Plus size={18} /> Add New User
+          <UserPlus size={18} /> Add New User
         </button>
       </div>
 
@@ -716,6 +785,146 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onAddUser }) => {
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 border border-transparent rounded-md text-sm font-medium text-white"
               >
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add User Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Add New User</h3>
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    id="firstName"
+                    value={addFormData.firstName}
+                    onChange={handleAddFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    id="lastName"
+                    value={addFormData.lastName}
+                    onChange={handleAddFormChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  value={addFormData.email}
+                  onChange={handleAddFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  id="password"
+                  value={addFormData.password}
+                  onChange={handleAddFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+                <p className="mt-1 text-xs text-gray-500">Default password is &quot;12345678&quot;</p>
+              </div>
+              <div>
+                <label
+                  htmlFor="dateOfBirth"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  id="dateOfBirth"
+                  value={addFormData.dateOfBirth}
+                  onChange={handleAddFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+                <p className="mt-1 text-xs text-gray-500">Age should be between 10 and 20 years</p>
+              </div>
+              <div>
+                <label
+                  htmlFor="role"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Role
+                </label>
+                <select
+                  name="role"
+                  id="role"
+                  value={addFormData.role}
+                  onChange={handleAddFormChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="student">Student</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => setIsAddModalOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateUser}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 border border-transparent rounded-md text-sm font-medium text-white"
+              >
+                Create User
               </button>
             </div>
           </div>
