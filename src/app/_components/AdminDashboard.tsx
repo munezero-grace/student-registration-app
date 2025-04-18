@@ -13,7 +13,8 @@ import { registerUser, RegistrationData } from "@/lib/services/authService";
 import { useToast } from "../contexts/ToastContext";
 import SkeletonLoader from "./SkeletonLoader";
 
-type AdminDashboardProps = unknown;
+// No props needed as we handle everything internally
+type AdminDashboardProps = Record<string, never>;
 
 const AdminDashboard: React.FC<AdminDashboardProps> = () => {
   const { showSuccess, showError, showInfo } = useToast();
