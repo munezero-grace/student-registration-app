@@ -5,25 +5,27 @@ import { useRouter } from 'next/navigation';
 import Navbar from '../_components/Navbar';
 import AdminDashboard from '../_components/AdminDashboard';
 import { isAdmin, isAuthenticated } from '@/lib/services/authService';
-import toast from 'react-hot-toast';
+import { useToast } from '../contexts/ToastContext';
 
 export default function AdminPage() {
   const router = useRouter();
+  const { showError } = useToast();
   
   useEffect(() => {
     // Check if user is authenticated and is an admin
     if (!isAuthenticated()) {
-      toast.error('Please login to access this page');
+      showError('Please login to access this page');
       router.push('/login');
       return;
     }
     
     if (!isAdmin()) {
-      toast.error('You do not have permission to access this page');
+      showError('You do not have permission to access this page');
       router.push('/profile');
       return;
     }
-  }, [router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAddUser = () => {
     router.push('/register');
