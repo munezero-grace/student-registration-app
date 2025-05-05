@@ -108,29 +108,14 @@ export const userService = {
         return getFromCache(cacheKey);
       }
       
-      // If no valid cache, make the API call
-      try {
-        const response = await api.get('/admin/users', { params });
-        console.log('Fetched users from API:', response.data);
-        
-        // Cache the response
-        setInCache(cacheKey, response.data);
-        
-        return response.data;
-      } catch (apiError) {
-        console.warn('API call failed, falling back to mock data:', apiError);
-
-        // If the real API fails, use the mock data from authService as fallback
-        // This is just for development purposes
-        const { getAllUsers } = await import('./authService');
-        const users = await getAllUsers();
-        console.log('Using mock users data:', users);
-        
-        // Cache the mock response
-        setInCache(cacheKey, users);
-        
-        return users;
-      }
+      // Make the API call
+      const response = await api.get('/admin/users', { params });
+      console.log('Fetched users from API:', response.data);
+      
+      // Cache the response
+      setInCache(cacheKey, response.data);
+      
+      return response.data;
     } catch (error) {
       console.error('Error fetching users:', error);
       throw error;
@@ -156,30 +141,12 @@ export const userService = {
         return getFromCache(cacheKey);
       }
       
-      try {
-        const response = await api.get(`/admin/users/${id}`);
-        
-        // Cache the response
-        setInCache(cacheKey, response.data);
-        
-        return response.data;
-      } catch (apiError) {
-        console.warn(`API call to get user ${id} failed, using mock data:`, apiError);
-        
-        // If the real API fails, use mock data
-        const { getAllUsers } = await import('./authService');
-        const users = await getAllUsers();
-        const user = users.find(u => u.id === id);
-        
-        if (!user) {
-          throw new Error('User not found');
-        }
-        
-        // Cache the mock response
-        setInCache(cacheKey, user);
-        
-        return user;
-      }
+      const response = await api.get(`/admin/users/${id}`);
+      
+      // Cache the response
+      setInCache(cacheKey, response.data);
+      
+      return response.data;
     } catch (error) {
       console.error(`Error fetching user ${id}:`, error);
       throw error;
@@ -196,27 +163,13 @@ export const userService = {
         throw new Error('Please login to access this feature');
       }
       
-      try {
-        const response = await api.put(`/admin/users/${id}`, userData);
-        
-        // Clear relevant caches after update
-        clearCache('/admin/users');
-        clearCache(`/admin/users/${id}`);
-        
-        return response.data;
-      } catch (apiError) {
-        console.warn(`API call to update user ${id} failed, using mock:`, apiError);
-        
-        // If the real API fails, use mock implementation
-        const { updateUser } = await import('./authService');
-        const result = await updateUser(id, userData);
-        
-        // Clear caches after update
-        clearCache('/admin/users');
-        clearCache(`/admin/users/${id}`);
-        
-        return result;
-      }
+      const response = await api.put(`/admin/users/${id}`, userData);
+      
+      // Clear relevant caches after update
+      clearCache('/admin/users');
+      clearCache(`/admin/users/${id}`);
+      
+      return response.data;
     } catch (error) {
       console.error(`Error updating user ${id}:`, error);
       throw error;
@@ -233,27 +186,13 @@ export const userService = {
         throw new Error('Please login to access this feature');
       }
       
-      try {
-        const response = await api.delete(`/admin/users/${id}`);
-        
-        // Clear relevant caches after deletion
-        clearCache('/admin/users');
-        clearCache(`/admin/users/${id}`);
-        
-        return response.data;
-      } catch (apiError) {
-        console.warn(`API call to delete user ${id} failed, using mock:`, apiError);
-        
-        // If the real API fails, use mock implementation
-        const { deleteUser } = await import('./authService');
-        const result = await deleteUser(id);
-        
-        // Clear caches after deletion
-        clearCache('/admin/users');
-        clearCache(`/admin/users/${id}`);
-        
-        return result;
-      }
+      const response = await api.delete(`/admin/users/${id}`);
+      
+      // Clear relevant caches after deletion
+      clearCache('/admin/users');
+      clearCache(`/admin/users/${id}`);
+      
+      return response.data;
     } catch (error) {
       console.error(`Error deleting user ${id}:`, error);
       throw error;
