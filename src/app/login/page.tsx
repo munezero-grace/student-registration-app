@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../_components/Navbar";
 import { login } from "@/lib/services/authService";
 import toast from "react-hot-toast";
+import { doSocialLogin } from "../actions"; // Import the social login function
 
 export default function LoginPage() {
   const router = useRouter();
@@ -270,6 +271,23 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.currentTarget);
+          const action = formData.get("action") as string;
+          await doSocialLogin();
+        }}
+      >
+        <button
+          className="bg-pink-400 text-white p-1 rounded-md m-1 text-lg"
+          type="submit"
+          name="action"
+          value="google"
+        >
+          Sign In With Google
+        </button>
+      </form>
     </>
   );
 }
