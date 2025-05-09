@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../_components/Navbar";
 import { login } from "@/lib/services/authService";
 import toast from "react-hot-toast";
+import { doSocialLogin } from "../actions"; // Import the social login function
 
 export default function LoginPage() {
   const router = useRouter();
@@ -247,6 +248,26 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-6">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-black">or</span>
+                </div>
+              </div>
+
+              <form action={doSocialLogin}>
+                <button
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white mb-3 mt-3 bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  type="submit"
+                  name="action"
+                  value="google"
+                >
+                  Sign In With Google
+                </button>
+              </form>
+
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
