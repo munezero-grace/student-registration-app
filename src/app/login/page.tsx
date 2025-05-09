@@ -291,14 +291,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const formData = new FormData(e.currentTarget);
-          const action = formData.get("action") as string;
-          await doSocialLogin();
-        }}
-      ></form>
     </>
   );
 }

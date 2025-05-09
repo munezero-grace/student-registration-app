@@ -6,7 +6,6 @@ import {
   UserProfile,
   fetchUserProfile,
   fetchUserProfileWithToken,
-  isAuthenticated,
 } from "@/lib/services/authService";
 import toast from "react-hot-toast";
 import { getSession } from "next-auth/react";
