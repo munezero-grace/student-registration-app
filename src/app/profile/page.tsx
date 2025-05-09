@@ -9,6 +9,7 @@ import {
 } from "@/lib/services/authService";
 import toast from "react-hot-toast";
 import { getSession } from "next-auth/react";
+import Image from "next/image";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -72,6 +73,7 @@ export default function ProfilePage() {
             registrationNumber: "N/A", // Not available for Google users
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
+            profilePicture: session.user.image || "", // Add profile picture from Google session
           };
 
           setProfile(userData);
@@ -229,16 +231,26 @@ export default function ProfilePage() {
                 <div className="flex flex-col md:flex-row items-center justify-between">
                   <div className="flex flex-col md:flex-row items-center">
                     <div className="relative h-24 w-24 md:mr-6 mb-4 md:mb-0">
-                      <div className="h-24 w-24 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-3xl font-bold text-white">
-                        {profile?.firstName && profile?.lastName ? (
-                          <>
-                            {profile.firstName.charAt(0)}
-                            {profile.lastName.charAt(0)}
-                          </>
-                        ) : (
-                          "U"
-                        )}
-                      </div>
+                      {profile?.profilePicture ? (
+                        <Image
+                          src={profile.profilePicture}
+                          alt="Profile Picture"
+                          className="h-24 w-24 rounded-full object-cover"
+                          width={96} // Specify width for optimization
+                          height={96} // Specify height for optimization
+                        />
+                      ) : (
+                        <div className="h-24 w-24 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-3xl font-bold text-white">
+                          {profile?.firstName && profile?.lastName ? (
+                            <>
+                              {profile.firstName.charAt(0)}
+                              {profile.lastName.charAt(0)}
+                            </>
+                          ) : (
+                            "U"
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="text-center md:text-left">
                       <h1 className="text-2xl font-bold">

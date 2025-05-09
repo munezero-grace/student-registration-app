@@ -11,6 +11,7 @@ export interface UserProfile {
   role: "admin" | "student";
   createdAt: string;
   updatedAt: string;
+  profilePicture?: string; // Optional profile picture field
 }
 
 // Interface for registration that includes password
@@ -113,6 +114,7 @@ const adaptProfileData = (apiData: any): UserProfile => {
       userData.createdAt || userData.created_at || new Date().toISOString(),
     updatedAt:
       userData.updatedAt || userData.updated_at || new Date().toISOString(),
+    profilePicture: userData.profilePicture || "", // Add profilePicture field
   };
 
   console.log("Adapted profile data:", profile); // For debugging
@@ -126,17 +128,14 @@ export const fetchUserProfileWithToken = async (
   try {
     console.log("Fetching profile with specific token...");
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-    const response = await fetch(
-      `${apiUrl}/api/profile`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const response = await fetch(`${apiUrl}/api/profile`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`API error: ${response.status} ${response.statusText}`);
@@ -225,18 +224,18 @@ export const registerUser = async (
     };
   } catch (error: any) {
     console.error("Registration error:", error);
-    
+
     // Handle specific error messages from the API
     if (error.response && error.response.data && error.response.data.message) {
-      return { 
-        success: false, 
-        message: error.response.data.message 
+      return {
+        success: false,
+        message: error.response.data.message,
       };
     }
-    
-    return { 
-      success: false, 
-      message: error.message || "Registration failed" 
+
+    return {
+      success: false,
+      message: error.message || "Registration failed",
     };
   }
 };
