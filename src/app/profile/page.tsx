@@ -68,7 +68,7 @@ export default function ProfilePage() {
             lastName: lastName || "",
             email: session.user.email || "Unknown",
             dateOfBirth: "N/A", // Google OAuth doesn't provide DOB
-            role: "student" as "student", // Default role for Google users to match type
+            role: "student" as const, // Default role for Google users to match type
             registrationNumber: "N/A", // Not available for Google users
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
